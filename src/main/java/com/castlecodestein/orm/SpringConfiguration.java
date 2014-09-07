@@ -20,20 +20,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages={"com.castlecodestein.orm.student"})
+@ComponentScan(basePackages = { "com.castlecodestein.orm.student" })
 public class SpringConfiguration {
 
-	/** 
+	/**
 	 * Spring's JPA Entity Manager wrapper.
+	 * 
 	 * @param source
 	 * @return
 	 * @throws PropertyVetoException
 	 */
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			DataSource source) throws PropertyVetoException {
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-		em.setDataSource(source);
+		em.setDataSource(this.dataSource());
 		em.setPackagesToScan(new String[] { "com.castlecodestein.orm" });
 		em.setPersistenceUnitName("default");
 
@@ -46,8 +46,7 @@ public class SpringConfiguration {
 
 	@Bean
 	public PlatformTransactionManager transactionManager(
-			LocalContainerEntityManagerFactoryBean entityManagerFactory)
-			throws PropertyVetoException {
+			LocalContainerEntityManagerFactoryBean entityManagerFactory) {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(entityManagerFactory
 				.getObject());
@@ -60,18 +59,20 @@ public class SpringConfiguration {
 	}
 
 	/**
-	 * Embedded data source.
+	 * Embedded data source. Schema.sql script resides in src/main/resources
+	 * folder and contains table/sequence definitions.
+	 * 
 	 * @return
 	 */
 	@Bean
 	public DataSource dataSource() {
 		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2)
-				.addScript("classpath:schema.sql")
-				.build();
+				.addScript("classpath:schema.sql").build();
 	}
 
 	/**
 	 * Hibernate specific properties.
+	 * 
 	 * @return
 	 */
 	private Properties additionalProperties() {
